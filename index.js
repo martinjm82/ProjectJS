@@ -1,5 +1,5 @@
-const { getProducts } = require("./services/api");
-const { printProducts } = require("./utils/formatter");
+import { getProducts } from "./services/api.js";
+import { printProducts } from "./utils/formatter.js";
 
 async function main() {
   try {

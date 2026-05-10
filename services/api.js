@@ -1,8 +1,6 @@
-const axios = require("axios");
+import axios from "axios";
 
-async function getProducts() {
+export async function getProducts() {
   const response = await axios.get("https://fakestoreapi.com/products");
   return response.data;
 }
-
-module.exports = { getProducts };
