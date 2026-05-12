@@ -1,0 +1,16 @@
+{
+  "name": "cli-products-manager",
+  "version": "1.0.0",
+  "description": "CLI para gestionar productos usando FakeStore API",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": ["cli", "fakestore", "products", "node"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}
