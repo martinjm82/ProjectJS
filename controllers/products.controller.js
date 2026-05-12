@@ -32,28 +32,31 @@ const validateProduct = (product, isPartial = false) => {
 };
 
 // GET /api/products - Obtener todos los productos
-export const getAllProducts = (req, res) => {
+export const getAllProducts = async (req, res) => {
   try {
-    const products = productsData.getProducts();
+    const products = await productsData.getProducts();
+    const filteredProducts = productsData.filterDeletedProducts(products);
     res.status(200).json({
       success: true,
-      count: products.length,
-      data: products
+      count: filteredProducts.length,
+      data: filteredProducts,
+      source: 'FakeStore API'
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'Error al obtener los productos'
+      error: 'Error al obtener los productos',
+      details: error.message
     });
   }
 };
 
 // GET /api/products/:id - Obtener un producto por ID
-export const getProductById = (req, res) => {
+export const getProductById = async (req, res) => {
   try {
-    const product = productsData.getProductById(req.params.id);
+    const product = await productsData.getProductById(req.params.id);
     
-    if (!product) {
+    if (!product || product._deleted) {
       return res.status(404).json({
         success: false,
         error: `Producto con ID ${req.params.id} no encontrado`
@@ -67,13 +70,14 @@ export const getProductById = (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'Error al obtener el producto'
+      error: 'Error al obtener el producto',
+      details: error.message
     });
   }
 };
 
 // POST /api/products - Crear un nuevo producto
-export const createProduct = (req, res) => {
+export const createProduct = async (req, res) => {
   try {
     const { title, price, description, category, image } = req.body;
 
@@ -87,29 +91,30 @@ export const createProduct = (req, res) => {
       });
     }
 
-    const newProduct = productsData.createProduct({
+    const newProduct = await productsData.createProduct({
       title,
       price,
       description,
       category,
-      image: image || 'https://via.placeholder.com/300x300?text=Product'
+      image: image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop'
     });
 
     res.status(201).json({
       success: true,
-      message: 'Producto creado exitosamente',
+      message: 'Producto creado exitosamente (almacenado localmente)',
       data: newProduct
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'Error al crear el producto'
+      error: 'Error al crear el producto',
+      details: error.message
     });
   }
 };
 
 // PUT /api/products/:id - Actualizar completamente un producto
-export const updateProduct = (req, res) => {
+export const updateProduct = async (req, res) => {
   try {
     const { title, price, description, category, image } = req.body;
 
@@ -123,12 +128,12 @@ export const updateProduct = (req, res) => {
       });
     }
 
-    const updatedProduct = productsData.updateProduct(req.params.id, {
+    const updatedProduct = await productsData.updateProduct(req.params.id, {
       title,
       price,
       description,
       category,
-      image: image || 'https://via.placeholder.com/300x300?text=Product'
+      image: image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop'
     });
 
     if (!updatedProduct) {
@@ -140,19 +145,20 @@ export const updateProduct = (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Producto actualizado exitosamente',
+      message: 'Producto actualizado exitosamente (cambios locales)',
       data: updatedProduct
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'Error al actualizar el producto'
+      error: 'Error al actualizar el producto',
+      details: error.message
     });
   }
 };
 
 // PATCH /api/products/:id - Actualizar parcialmente un producto
-export const partialUpdateProduct = (req, res) => {
+export const partialUpdateProduct = async (req, res) => {
   try {
     // Validar que al menos un campo esté presente
     if (Object.keys(req.body).length === 0) {
@@ -172,7 +178,7 @@ export const partialUpdateProduct = (req, res) => {
       });
     }
 
-    const updatedProduct = productsData.partialUpdateProduct(req.params.id, req.body);
+    const updatedProduct = await productsData.partialUpdateProduct(req.params.id, req.body);
 
     if (!updatedProduct) {
       return res.status(404).json({
@@ -183,21 +189,22 @@ export const partialUpdateProduct = (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Producto actualizado parcialmente',
+      message: 'Producto actualizado parcialmente (cambios locales)',
       data: updatedProduct
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'Error al actualizar el producto'
+      error: 'Error al actualizar el producto',
+      details: error.message
     });
   }
 };
 
 // DELETE /api/products/:id - Eliminar un producto
-export const deleteProduct = (req, res) => {
+export const deleteProduct = async (req, res) => {
   try {
-    const deleted = productsData.deleteProduct(req.params.id);
+    const deleted = await productsData.deleteProduct(req.params.id);
 
     if (!deleted) {
       return res.status(404).json({
@@ -208,12 +215,13 @@ export const deleteProduct = (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: `Producto con ID ${req.params.id} eliminado exitosamente`
+      message: `Producto con ID ${req.params.id} eliminado exitosamente (marcado como eliminado localmente)`
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'Error al eliminar el producto'
+      error: 'Error al eliminar el producto',
+      details: error.message
     });
   }
 };
